@@ -6,11 +6,21 @@ import jwt from "jsonwebtoken";
 import { sendEmail } from "../../../utils/sendEmails.js";
 import { signupTemp } from "../../../utils/generateHtml.js";
 import tokenModel from "../../../../DB/models/token.model.js";
+import cloudinary from "../../../utils/cloud.js";
 
 export const register = asyncHandler(async (req, res, next) => {
   const { userName, email, password, role } = req.body;
   const isUser = await userModel.findOne({ email });
   const isUserName = await userModel.findOne({ userName });
+  if (!req.file) {
+    return next(new Error("profileImage is required", { cause: 400 }));
+  }
+  const { secure_url, public_id } = await cloudinary.uploader.upload(
+    req.file.path,
+    {
+      folder: `${process.env.FOLDER_CLOUDINARY}/register`,
+    }
+  );
   if (isUser) {
     return next(new Error("email already registered !", { cause: 409 }));
   }
@@ -27,8 +37,8 @@ export const register = asyncHandler(async (req, res, next) => {
     userName,
     email,
     password: hashPassword,
-    role,
     activationCode,
+    profileImage: { url: secure_url, id: public_id },
   });
 
   const link = `http://localhost:3000/auth/confirmEmail/${activationCode}`;
@@ -90,7 +100,7 @@ export const login = asyncHandler(async (req, res, next) => {
     agent: req.headers["user-agent"],
   });
 
-  user.status = "online";
+  user.status = "verified";
   await user.save();
 
   return res.status(200).json({ success: true, result: token });

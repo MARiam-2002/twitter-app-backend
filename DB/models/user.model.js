@@ -40,8 +40,8 @@ const userSchema = new Schema(
     phone: String,
     status: {
       type: String,
-      enum: ["online", "offline"],
-      default: "offline",
+      enum: ["unverified", "verified","suspended"],
+      default: "unverified",
     },
     role: {
       type: String,
