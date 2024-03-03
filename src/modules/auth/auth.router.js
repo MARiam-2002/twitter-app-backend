@@ -8,8 +8,9 @@ const router = Router();
 
 router.post(
   "/register",
-  isValidation(Validators.registerSchema),
   fileUpload(filterObject.image).single("profileImage"),
+  isValidation(Validators.registerSchema),
+
   userController.register
 );
 
