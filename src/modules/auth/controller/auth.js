@@ -41,7 +41,7 @@ export const register = asyncHandler(async (req, res, next) => {
     profileImage: { url: secure_url, id: public_id },
   });
 
-  const link = `http://localhost:3000/auth/confirmEmail/${activationCode}`;
+  const link = `https://twitter-app-backend.vercel.app/auth/confirmEmail/${activationCode}`;
 
   const isSent = await sendEmail({
     to: email,
@@ -75,7 +75,7 @@ export const login = asyncHandler(async (req, res, next) => {
   const user = await userModel.findOne({ email });
 
   if (!user) {
-    return next(new Error("Invalid-Email", { cause: 400 }));
+    return next(new Error("Email Not Found", { cause: 400 }));
   }
 
   if (!user.isConfirmed) {
@@ -85,12 +85,12 @@ export const login = asyncHandler(async (req, res, next) => {
   const match = bcryptjs.compareSync(password, user.password);
 
   if (!match) {
-    return next(new Error("Invalid-Password", { cause: 400 }));
+    return next(new Error("Invalid-Email or Password", { cause: 400 }));
   }
 
   const token = jwt.sign(
     { id: user._id, email: user.email },
-    process.env.TOKEN_KEY,
+    process.env.TOKEN_SIGNATURE
   );
 
   await tokenModel.create({
@@ -99,13 +99,24 @@ export const login = asyncHandler(async (req, res, next) => {
     agent: req.headers["user-agent"],
   });
 
-  user.status = "verified";
+  user.status = "online";
   await user.save();
 
-  return res.status(200).json({ success: true, result: token });
+  return res.status(200).json({
+    success: true,
+    status: 200,
+    message: "login success",
+
+    data: {
+      token,
+      userName: user.userName,
+      email: user.email,
+    },
+  });
 });
 
 //send forget Code
+
 export const sendForgetCode = asyncHandler(async (req, res, next) => {
   const user = await userModel.findOne({ email: req.body.email });
 
@@ -120,13 +131,26 @@ export const sendForgetCode = asyncHandler(async (req, res, next) => {
 
   user.forgetCode = code;
   await user.save();
-
+  const token = jwt.sign(
+    { id: user._id, email: user.email },
+    process.env.TOKEN_SIGNATURE
+  );
+  await tokenModel.create({
+    token,
+    user: user._id,
+    agent: req.headers["user-agent"],
+  });
   return (await sendEmail({
     to: user.email,
     subject: "Reset Password",
     html: resetPassword(code),
   }))
-    ? res.status(200).json({ success: true, message: "check you email!" })
+    ? res.status(200).json({
+        success: true,
+        status: 200,
+        message: "check you email!",
+        data: { token },
+      })
     : next(new Error("Something went wrong!", { cause: 400 }));
 });
 
@@ -135,25 +159,42 @@ export const resetPasswordByCode = asyncHandler(async (req, res, next) => {
     req.body.password,
     +process.env.SALT_ROUND
   );
-  const checkUser = await userModel.findOne({ email: req.body.email });
-  if (!checkUser) {
-    return next(new Error("Invalid email!", { cause: 400 }));
-  }
-  if (checkUser.forgetCode !== req.body.forgetCode) {
-    return next(new Error("Invalid code!", { status: 400 }));
-  }
   const user = await userModel.findOneAndUpdate(
-    { email: req.body.email },
-    { password: newPassword, $unset: { forgetCode: 1 } }
+    { email: req.user.email },
+    { password: newPassword }
   );
 
   //invalidate tokens
-  const tokens = await tokenModel.find({ user: user._id });
+  const tokens = await tokenModel.find({ user: req.user._id });
 
   tokens.forEach(async (token) => {
     token.isValid = false;
     await token.save();
   });
 
-  return res.status(200).json({ success: true, message: "Try to login!" });
+  return res
+    .status(200)
+    .json({ success: true, status: 200, message: "Try to login!" });
+});
+
+export const VerifyCode = asyncHandler(async (req, res, next) => {
+  const user = await userModel.findOne({ email: req.user.email });
+  if (!user.forgetCode) {
+    return next(new Error("go to resend forget code", { status: 400 }));
+  }
+  if (user.forgetCode !== req.body.forgetCode) {
+    return next(new Error("Invalid code!", { status: 400 }));
+  }
+  await userModel.findOneAndUpdate(
+    { email: req.user.email },
+    { $unset: { forgetCode: 1 } }
+  );
+
+  return res
+    .status(200)
+    .json({
+      success: true,
+      status: 200,
+      data: { message: "go to reset new password" },
+    });
 });
