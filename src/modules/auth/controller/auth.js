@@ -102,7 +102,7 @@ export const login = asyncHandler(async (req, res, next) => {
     agent: req.headers["user-agent"],
   });
 
-  user.status = "online";
+  user.status = "verified";
   await user.save();
 
   return res.status(200).json({
