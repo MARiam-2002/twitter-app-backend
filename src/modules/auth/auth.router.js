@@ -20,4 +20,14 @@ router.get(
 
 router.post("/login", isValidation(Validators.login), userController.login);
 
+router.patch(
+  "/forgetCode",
+  isValidation(Validators.forgetCode),
+  userController.sendForgetCode
+);
+router.patch(
+  "/resetPassword",
+  isValidation(Validators.resetPassword),
+  userController.resetPasswordByCode
+);
 export default router;
