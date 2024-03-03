@@ -91,7 +91,6 @@ export const login = asyncHandler(async (req, res, next) => {
   const token = jwt.sign(
     { id: user._id, email: user.email },
     process.env.TOKEN_KEY,
-    { expiresIn: "2d" }
   );
 
   await tokenModel.create({

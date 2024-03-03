@@ -16,7 +16,7 @@ export const isAuthenticated = asyncHandler(async (req, res, next) => {
 
   const tokenDB = await tokenModel.findOne({ token, isValid: true });
 
-  if (!tokenDB) {
+  if (!tokenDB || !tokenDB.isValid) {
     return next(new Error("Token expired!"));
   }
 
