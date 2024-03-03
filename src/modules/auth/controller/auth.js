@@ -9,7 +9,7 @@ import randomstring from "randomstring";
 import cloudinary from "../../../utils/cloud.js";
 
 export const register = asyncHandler(async (req, res, next) => {
-  const { userName, email, password, role } = req.body;
+  const { userName, email, password, firstName, lastName } = req.body;
   const isUser = await userModel.findOne({ email });
   const isUserName = await userModel.findOne({ userName });
   if (!req.file) {
@@ -35,6 +35,8 @@ export const register = asyncHandler(async (req, res, next) => {
 
   const user = await userModel.create({
     userName,
+    lastName,
+    firstName,
     email,
     password: hashPassword,
     activationCode,
@@ -190,11 +192,9 @@ export const VerifyCode = asyncHandler(async (req, res, next) => {
     { $unset: { forgetCode: 1 } }
   );
 
-  return res
-    .status(200)
-    .json({
-      success: true,
-      status: 200,
-      data: { message: "go to reset new password" },
-    });
+  return res.status(200).json({
+    success: true,
+    status: 200,
+    data: { message: "go to reset new password" },
+  });
 });
