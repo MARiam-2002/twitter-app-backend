@@ -7,8 +7,9 @@ import { resetPassword, signupTemp } from "../../../utils/generateHtml.js";
 import tokenModel from "../../../../DB/models/token.model.js";
 import randomstring from "randomstring";
 import cloudinary from "../../../utils/cloud.js";
+import { sendEmail } from "../../../utils/sendEmails.js";
 
-export const register = asyncHandler(async (req, res, next) => {
+export const register =async (req, res, next) => {
   const { userName, email, password, firstName, lastName } = req.body;
   const isUser = await userModel.findOne({ email });
   const isUserName = await userModel.findOne({ userName });
@@ -55,7 +56,7 @@ export const register = asyncHandler(async (req, res, next) => {
         .status(200)
         .json({ success: true, message: "Please review Your email!" })
     : next(new Error("something went wrong!", { cause: 400 }));
-});
+}
 
 export const activationAccount = asyncHandler(async (req, res, next) => {
   const user = await userModel.findOneAndUpdate(
@@ -92,7 +93,7 @@ export const login = asyncHandler(async (req, res, next) => {
 
   const token = jwt.sign(
     { id: user._id, email: user.email },
-    process.env.TOKEN_SIGNATURE
+    process.env.TOKEN_KEY
   );
 
   await tokenModel.create({
