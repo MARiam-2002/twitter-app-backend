@@ -13,6 +13,7 @@ export const isValidation = (Schema) => {
       ...req.params,
       ...req.query,
       ...req.file,
+      ...req.files,
     };
     const validationResult = Schema.validate(copyReq, { abortEarly: false });
     if (validationResult.error) {
