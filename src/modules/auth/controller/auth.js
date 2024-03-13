@@ -136,7 +136,7 @@ export const sendForgetCode = asyncHandler(async (req, res, next) => {
   await user.save();
   const token = jwt.sign(
     { id: user._id, email: user.email },
-    process.env.TOKEN_SIGNATURE
+    process.env.TOKEN_KEY
   );
   await tokenModel.create({
     token,
