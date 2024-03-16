@@ -1,20 +1,21 @@
 import mongoose, { Schema, Types, model } from "mongoose";
 
 const userSchema = new Schema(
-  { firstName: {
-    type: String,
-    required: true,
-    trim: true,
-    min: 3,
-    max: 20,
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true,
-    min: 3,
-    max: 20,
-  },
+  {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+      min: 3,
+      max: 20,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      min: 3,
+      max: 20,
+    },
     userName: {
       type: String,
       required: true,
@@ -40,7 +41,7 @@ const userSchema = new Schema(
     phone: String,
     status: {
       type: String,
-      enum: ["unverified", "verified","suspended"],
+      enum: ["unverified", "verified", "suspended"],
       default: "unverified",
     },
     role: {
@@ -49,7 +50,11 @@ const userSchema = new Schema(
       default: "user",
       required: true,
     },
-    wishlist: [Types.ObjectId],
+    likes: [{
+      type: Types.ObjectId,
+      ref: "Post",
+    }],
+
     isConfirmed: {
       type: Boolean,
       default: false,
@@ -80,6 +85,8 @@ const userSchema = new Schema(
         },
       },
     ],
+    
+
   },
   { timestamps: true }
 );
