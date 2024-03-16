@@ -6,7 +6,12 @@ import { fileUpload, filterObject } from "../../utils/multer.js";
 import { isAuthenticated } from "../../middleware/authentication.middleware.js";
 const router = Router();
 
-router.post('/',postController.addPost)
+router.post('/',isAuthenticated, fileUpload(filterObject.image).fields([
+    { name: "subImages", maxCount: 3 },
+    { name: "defaultImage", maxCount: 1 },
+
+]), postController.addPost)
+router.post('/likedHandler', postController.likeHandler)
 
 
 

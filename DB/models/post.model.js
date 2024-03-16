@@ -12,7 +12,7 @@ const postSchema = new Schema(
       required: true,
       ref: "User",
     },
-    images: [
+    subImages: [
       {
         url: {
           type: String,
@@ -21,6 +21,16 @@ const postSchema = new Schema(
           type: String,
         }
       }
+    ],
+    defaultImage: {
+      url: { type: String, },
+      id: { type: String, },
+    },
+    Likes: [
+      {
+        type: Types.ObjectId,
+        ref: "User",
+      },
     ],
     cloudFolder: { type: String, unique: true },
 
