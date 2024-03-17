@@ -19,6 +19,7 @@ export const addPost =  async (req, res, next) => {
 
   if (req.files) {
     const cloudFolder = nanoid();
+    console.log(cloudFolder);
   let images = [];
   for (const file of req.files.subImages) {
     const { secure_url, public_id } = await cloudinary.uploader.upload(
@@ -34,10 +35,11 @@ export const addPost =  async (req, res, next) => {
       folder: `${process.env.FOLDER_CLOUDINARY}/Trips/${cloudFolder}`,
     }
     );
-    post.defaultImage = { url: secure_url, id: public_id };
-    post.images = images;
-    post.cloudFolder = cloudFolder;
-    await post.save();
+await postModel.findByIdAndUpdate(post._id, {
+    subImages: images,
+    defaultImage: { url: secure_url, id: public_id },
+    cloudFolder,
+  });
   }
   const populatePost = await postModel
     .findById(post._id)

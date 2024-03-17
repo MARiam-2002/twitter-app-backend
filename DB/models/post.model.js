@@ -32,7 +32,7 @@ const postSchema = new Schema(
         ref: "User",
       },
     ],
-    cloudFolder: { type: String, unique: true },
+    cloudFolder: { type: String, unique: true ,default: ""},
 
   },
   { timestamps: true }
