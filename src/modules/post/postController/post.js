@@ -48,9 +48,16 @@ await postModel.findByIdAndUpdate(post._id, {
 } 
 
 
+export const getallPost = asyncHandler(async (req, res, next) => {
+  const posts = await postModel
+    .find({ ...req.query })
+    .pagination(req.query.page)
+    .customSelect(req.query.fields)
+    .sort(req.query.sort);
+  return res.status(200).json({ success: true, posts });
+});
 
-
-export const likeHandler = asyncHandler(async (req, res, next) => {
+export const likeHandler = async (req, res, next) => {
   const { postId } = req.params;
   const post = await postModel.findById(postId);
   if (!post) {
@@ -81,4 +88,4 @@ export const likeHandler = asyncHandler(async (req, res, next) => {
     postUser,
     modifiedUser
   });
-})
+}

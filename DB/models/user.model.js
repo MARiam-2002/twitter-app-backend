@@ -50,7 +50,7 @@ const userSchema = new Schema(
       default: "user",
       required: true,
     },
-    likes: [{
+    Likes: [{
       type: Types.ObjectId,
       ref: "Post",
     }],
