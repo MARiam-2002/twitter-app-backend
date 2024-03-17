@@ -11,9 +11,9 @@ router.post('/',isAuthenticated, fileUpload(filterObject.image).fields([
     { name: "defaultImage", maxCount: 1 },
 
 ]), postController.addPost)
-router.post('/likedHandler', postController.likeHandler)
+router.put('/likedHandler/:postId',isAuthenticated, postController.likeHandler)
 
-
+router.get('/',postController.getallPost)
 
 
 export default router;
