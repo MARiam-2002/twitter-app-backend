@@ -12,6 +12,16 @@ const postSchema = new Schema(
       required: true,
       ref: "User",
     },
+    retweetsUser: [
+      {
+        type: Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    postData: {
+      type: Types.ObjectId,
+      ref: "Post",
+    },
     subImages: [
       {
         url: {
