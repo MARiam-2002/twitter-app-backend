@@ -46,8 +46,6 @@ export const bootstrap = (app, express) => {
     return next(new Error("not found page", { cause: 404 }));
   });
 
-  app.use((error, req, res, next) => {
-    return res.json({ message: error.message, stack: error.stack });
-  });
+ 
   app.use(globalErrorHandling);
 };
