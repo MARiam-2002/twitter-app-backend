@@ -10,7 +10,7 @@ import cloudinary from "../../../utils/cloud.js";
 import { sendEmail } from "../../../utils/sendEmails.js";
 
 export const register =async (req, res, next) => {
-  const { userName, email, password, firstName, lastName } = req.body;
+  const { userName, email, password} = req.body;
   const isUser = await userModel.findOne({ email });
   const isUserName = await userModel.findOne({ userName });
   if (!req.file) {
@@ -36,8 +36,6 @@ export const register =async (req, res, next) => {
 
   const user = await userModel.create({
     userName,
-    lastName,
-    firstName,
     email,
     password: hashPassword,
     activationCode,
