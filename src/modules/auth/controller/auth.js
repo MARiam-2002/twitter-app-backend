@@ -9,19 +9,14 @@ import randomstring from "randomstring";
 import cloudinary from "../../../utils/cloud.js";
 import { sendEmail } from "../../../utils/sendEmails.js";
 
-export const register =async (req, res, next) => {
-  const { userName, email, password} = req.body;
+export const register = async (req, res, next) => {
+  const { userName, email, password } = req.body;
   const isUser = await userModel.findOne({ email });
   const isUserName = await userModel.findOne({ userName });
-  if (!req.file) {
-    return next(new Error("profileImage is required", { cause: 400 }));
-  }
-  const { secure_url, public_id } = await cloudinary.uploader.upload(
-    req.file.path,
-    {
-      folder: `${process.env.FOLDER_CLOUDINARY}/register`,
-    }
-  );
+  // if (!req.file) {
+  //   return next(new Error("profileImage is required", { cause: 400 }));
+  // }
+ 
   if (isUser) {
     return next(new Error("email already registered !", { cause: 409 }));
   }
@@ -39,9 +34,19 @@ export const register =async (req, res, next) => {
     email,
     password: hashPassword,
     activationCode,
-    profileImage: { url: secure_url, id: public_id },
   });
-
+  if (req.file) {
+    const { secure_url, public_id } = await cloudinary.uploader.upload(
+      req.file.path,
+      {
+        folder: `${process.env.FOLDER_CLOUDINARY}/register`,
+      }
+    );
+    user.profileImage.url = secure_url;
+    user.profileImage.id = public_id;
+    await user.save();
+    
+  }
   const link = `https://twitter-app-backend.vercel.app/auth/confirmEmail/${activationCode}`;
 
   const isSent = await sendEmail({
@@ -54,7 +59,7 @@ export const register =async (req, res, next) => {
         .status(200)
         .json({ success: true, message: "Please review Your email!" })
     : next(new Error("something went wrong!", { cause: 400 }));
-}
+};
 
 export const activationAccount = asyncHandler(async (req, res, next) => {
   const user = await userModel.findOneAndUpdate(
